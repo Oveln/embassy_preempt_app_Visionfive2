@@ -1,0 +1,19 @@
+rustflags = [
+  "-C", "link-arg=--nmagic",
+  "-C", "link-arg=-Tlink.x",
+]
+
+[build]
+target = "riscv64imc-unknown-none-elf.json"
+
+[alias]
+rb = "run --bin"
+rrb = "run --release --bin"
+
+# [env]
+# DEFMT_LOG = "trace"
+# DEFMT_LOG = "info"
+[profile.release]
+strip = false   # symbols are not flashed to the microcontroller, so don't strip them.
+lto = true
+opt-level = "z" # Optimize for size.

@@ -1,0 +1,68 @@
+[package]
+name = "embassy_preempt_app"
+version = "0.1.0"
+edition = "2021"
+authors = ["VisionFive2 JH7110 Development"]
+description = "Embassy Preempt application for JH7110 VisionFive2 platform"
+
+[workspace]
+
+[[bin]]
+name = "console"
+test = false
+
+[lib]
+name = "embassy_preempt_app"
+test = false
+
+[dependencies]
+critical-section = { version = "1.2", features = ["restore-state-bool"] }
+
+# Embassy Preempt modules
+embassy-preempt-executor = { path = "../embassy_preempt/modules/embassy-preempt-executor" }
+embassy-preempt-log = { path = "../embassy_preempt/modules/embassy-preempt-log" }
+embassy-preempt-platform = { path = "../embassy_preempt/modules/embassy-preempt-platform" }
+embassy-preempt-mem = { path = "../embassy_preempt/modules/embassy-preempt-mem" }
+embassy-preempt-macros = { path = "../embassy_preempt/modules/embassy-preempt-macros" }
+
+# RISC-V dependencies
+riscv ={ version = "0.16.0", optional = true }
+riscv-rt = { version = "0.17.1", optional = true }
+
+spin = "0.10.0"
+portable-atomic = "1.11.1"
+
+[dev-dependencies]
+defmt = "1.0.1"
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+lto = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+codegen-units = 1
+debug = 2
+opt-level = 3
+lto = true
+
+[features]
+default = ["jh7110"]
+
+# Logging features
+logs = ["log-os", "log-task", "log-mem", "log-timer", "log-scheduler"]
+log-base = ["embassy-preempt-log/log-base"]
+log-os = ["log-base", "embassy-preempt-log/log-os"]
+log-task = ["log-base", "embassy-preempt-log/log-task"]
+log-mem = ["log-base", "embassy-preempt-log/log-mem"]
+log-timer = ["log-base", "embassy-preempt-log/log-timer"]
+log-scheduler = ["log-base", "embassy-preempt-log/log-scheduler"]
+
+# Platform-specific features
+riscv64 = ["dep:riscv"]
+jh7110 = ["riscv64", "embassy-preempt-platform/jh7110", "dep:riscv-rt", "logs", "log-uart"]
+log-uart = ["embassy-preempt-log/log-uart"]
