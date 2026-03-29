@@ -16,7 +16,7 @@ use embassy_preempt_log::task_log;
 use embassy_preempt_platform::{chip::constants::interrupt::MSIP, get_platform, get_platform_trait};
 
 // Import library modules
-use embassy_preempt_app::{bss, sync, system_info};
+use embassy_preempt_app::{bss, intercom, sync, system_info};
 
 // ============================================================================
 // Shared Memory Structures
@@ -93,28 +93,14 @@ fn task6(_args: *mut c_void) {
 }
 
 async fn task7(_args: *mut c_void) {
-    let hart_sync = sync::get_hart_sync();
-
-    /// Trigger machine software interrupt for hart 1
-    fn trigger_misp_hart1() {
-        unsafe {
-            task_log!(info, "Triggering IPI for hart 1");
-            // Hart 1 MSIP address is 0x02000004
-            let msip_hart1: *mut u32 = 0x0200_0004 as *mut u32;
-            core::ptr::write_volatile(msip_hart1, 1);
-        }
-    }
+    task_log!(info, "[InterCom] Task started, waiting for messages from StarryOS");
 
     loop {
-        task_log!(info, "Heartbeat from hart 0");
-        // Timer::after_ticks(16_000_000).await;
+        // Wait for IPI from StarryOS
         embassy_preempt_executor::ipi::wait_for_ipi().await;
 
-        // Check if hart 1 is ready and send IPI
-        if hart_sync.is_hart1_ready() {
-            hart_sync.set_ipi_sent();
-            trigger_misp_hart1();
-        }
+        // Process any pending messages
+        intercom::process_pending();
     }
 }
 
@@ -132,6 +118,9 @@ fn main() -> ! {
 
     // Initialize OS
     OSInit();
+
+    // Initialize inter-system communication
+    intercom::init();
 
     task_log!(info, "[OS Status] OSInit completed!");
     task_log!(info, "========================================");

@@ -7,5 +7,6 @@
 
 pub mod bss;
 pub mod csr;
+pub mod intercom;
 pub mod sync;
 pub mod system_info;

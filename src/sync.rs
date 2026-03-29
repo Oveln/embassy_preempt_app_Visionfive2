@@ -96,3 +96,7 @@ pub fn get_hart_sync() -> &'static HartSyncFlags {
         &*(addr as *const HartSyncFlags)
     }
 }
+
+/// Shared memory base address for inter-system communication
+/// 0xc8000000 + 256 (after HartSyncFlags which is smaller than 256 bytes)
+pub const INTERCOM_SHM_BASE: usize = 0xc8000100;
