@@ -33,7 +33,7 @@ impl HartSyncFlags {
             // Use volatile write to ensure magic number is written
             (self as *const Self as *mut u16).write_volatile(Self::MAGIC);
         }
-        self.hart0_os_ready.store(false, Ordering::SeqCst);
+        self.hart0_os_ready.store(true, Ordering::SeqCst);
         self.hart1_os_ready.store(false, Ordering::SeqCst);
         self.hart0_ipi_sent.store(false, Ordering::SeqCst);
     }

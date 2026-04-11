@@ -6,7 +6,9 @@
 #![no_std]
 
 pub mod bss;
+pub mod cpu_freq;
 pub mod csr;
+pub mod gpio;
 pub mod intercom;
 pub mod sync;
 pub mod system_info;

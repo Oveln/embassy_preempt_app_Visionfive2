@@ -13,10 +13,10 @@ use portable_atomic::AtomicBool;
 use critical_section::Mutex;
 use embassy_preempt_executor::{os_time::blockdelay::delay, os_time::timer::Timer, AsyncOSTaskCreate, OSInit, OSStart, SyncOSTaskCreate};
 use embassy_preempt_log::task_log;
-use embassy_preempt_platform::{chip::constants::interrupt::MSIP, get_platform, get_platform_trait};
+use embassy_preempt_platform::{get_platform, get_platform_trait};
 
 // Import library modules
-use embassy_preempt_app::{bss, intercom, sync, system_info};
+use embassy_preempt_app::{bss, gpio, intercom, sync, system_info};
 
 // ============================================================================
 // Shared Memory Structures
@@ -92,6 +92,9 @@ fn task6(_args: *mut c_void) {
     delay(SHORT_TIME);
 }
 
+static A: portable_atomic::AtomicUsize = portable_atomic::AtomicUsize::new(0);
+static B: portable_atomic::AtomicUsize = portable_atomic::AtomicUsize::new(0);
+
 async fn task7(_args: *mut c_void) {
     task_log!(info, "[InterCom] Task started, waiting for messages from StarryOS");
 
@@ -100,7 +103,26 @@ async fn task7(_args: *mut c_void) {
         embassy_preempt_executor::ipi::wait_for_ipi().await;
 
         // Process any pending messages
+        {
+            // intercom::SWITCH_CONTEXT_CYCLE_COUNT = B - A;
+            use portable_atomic::Ordering;
+            intercom::SWITCH_CONTEXT_CYCLE_COUNT.store(B.load(Ordering::Acquire) - A.load(Ordering::Acquire), Ordering::Release);
+        }
+        task_log!(info, "SWITCH_CONTEXT_CYCLE_COUNT = {}", unsafe{intercom::SWITCH_CONTEXT_CYCLE_COUNT.load(Ordering::Acquire)});
         intercom::process_pending();
+        unsafe{crate::gpio::gpio().set_high(45);}
+        B.store(0, Ordering::Release);
+        A.store(riscv::register::cycle::read(), Ordering::Release);
+    }
+}
+
+async fn task8(_args: *mut c_void) {
+    loop {
+        if B.load(Ordering::Acquire) == 0 {
+            B.store(riscv::register::cycle::read(), Ordering::Release);
+        }
+        unsafe{crate::gpio::gpio().set_low(37);}
+        unsafe{crate::gpio::gpio().set_low(45);}
     }
 }
 
@@ -115,6 +137,9 @@ fn main() -> ! {
 
     // Display early trap vector info for debugging
     system_info::print_trap_vector_info();
+    unsafe {
+        gpio::init_gpio();
+    }
 
     // Initialize OS
     OSInit();
@@ -150,7 +175,9 @@ fn main() -> ! {
     SyncOSTaskCreate(task5, core::ptr::null_mut(), core::ptr::null_mut(), 10);
     SyncOSTaskCreate(task6, core::ptr::null_mut(), core::ptr::null_mut(), 35);
     AsyncOSTaskCreate(task7, core::ptr::null_mut(), core::ptr::null_mut(), 36);
-
+    AsyncOSTaskCreate(task8, core::ptr::null_mut(), core::ptr::null_mut(), 50);
     // Start OS (never returns)
     OSStart();
+
+    loop {}
 }

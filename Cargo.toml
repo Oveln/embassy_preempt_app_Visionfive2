@@ -11,12 +11,32 @@ description = "Embassy Preempt application for JH7110 VisionFive2 platform"
 name = "console"
 test = false
 
+[[bin]]
+name = "perf_test"
+test = false
+
+[[bin]]
+name = "led_test"
+test = false
+
+[[bin]]
+name = "timer_test"
+test = false
+
+[[bin]]
+name = "cpu_freq_test"
+test = false
+
+[[bin]]
+name = "ctx_switch_test"
+test = false
+
 [lib]
 name = "embassy_preempt_app"
 test = false
 
 [dependencies]
-critical-section = { version = "1.2", features = ["restore-state-bool"] }
+critical-section = { version = "1.2"}
 
 # Embassy Preempt modules
 embassy-preempt-executor = { path = "../embassy_preempt/modules/embassy-preempt-executor" }
@@ -27,15 +47,17 @@ embassy-preempt-macros = { path = "../embassy_preempt/modules/embassy-preempt-ma
 
 # RISC-V dependencies
 riscv ={ version = "0.16.0", optional = true }
-riscv-rt = { version = "0.17.1", optional = true }
 
 spin = "0.10.0"
-portable-atomic = "1.11.1"
+portable-atomic = { version = "1.13.1", features = ["fallback"] }
 
 # Inter-hart communication
-ov-channal = { git = "https://github.com/Oveln/ov_channal", rev = "41744b81f90e4a6c68ede8ff85570113f8539035" }
+ov-channal = { path = "../../ov_channal" }
+# ov-channal = { git = "https://github.com/Oveln/ov_channal", rev = "41744b81f90e4a6c68ede8ff85570113f8539035" }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 postcard = { version = "1.1", default-features = false }
+
+aclint = { git = "https://github.com/rustsbi/aclint" }
 
 [dev-dependencies]
 defmt = "1.0.1"
@@ -69,5 +91,5 @@ log-scheduler = ["log-base", "embassy-preempt-log/log-scheduler"]
 
 # Platform-specific features
 riscv64 = ["dep:riscv"]
-jh7110 = ["riscv64", "embassy-preempt-platform/jh7110", "dep:riscv-rt", "logs", "log-uart"]
+jh7110 = ["riscv64", "embassy-preempt-platform/jh7110", "logs", "log-uart"]
 log-uart = ["embassy-preempt-log/log-uart"]

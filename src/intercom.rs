@@ -64,6 +64,8 @@ fn handle_message(msg: Message) {
     }
 }
 
+pub static SWITCH_CONTEXT_CYCLE_COUNT: portable_atomic::AtomicUsize = portable_atomic::AtomicUsize::new(0);
+
 /// Handle RPC request
 fn handle_request(method_id: u64, msg: Message) {
     const HELLO_WORLD: u64 = 0;
@@ -79,7 +81,8 @@ fn handle_request(method_id: u64, msg: Message) {
                     return;
                 }
             };
-            let result = 0;
+            use portable_atomic::Ordering;
+            let result = SWITCH_CONTEXT_CYCLE_COUNT.load(Ordering::Acquire);
             if let Ok(msg) = Message::response(request_id, &result) {
                 send_message(msg);
             }
@@ -123,11 +126,16 @@ pub fn send_notification(id: u32) {
     send_message(msg);
 }
 
-/// Trigger IPI to hart 1
+/// Trigger IPI to hart 1~4
+/// 0x0200_0000 4B - hart 0
+/// 0x0200_0004 4B - hart 1
+/// 0x0200_0008 4B - hart 2
+/// 0x0200_000C 4B - hart 3
+/// 0x0200_0010 4B - hart 4
 fn trigger_ipi_hart1() {
     crate::sync::get_hart_sync().set_ipi_sent();
-    unsafe {
-        let msip: *mut u32 = 0x0200_0004 as *mut u32;
-        core::ptr::write_volatile(msip, 1);
+    let msip: *mut u32 = 0x0200_0004 as *mut u32;
+    for i in 0..4 {
+        unsafe { core::ptr::write_volatile(msip.offset(i), 1); }
     }
 }
