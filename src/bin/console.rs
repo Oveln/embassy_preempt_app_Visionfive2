@@ -16,7 +16,7 @@ use embassy_preempt_log::task_log;
 use embassy_preempt_platform::{get_platform, get_platform_trait};
 
 // Import library modules
-use embassy_preempt_app::{bss, gpio, intercom, sync, system_info};
+use embassy_preempt_app::{gpio, intercom, sync, system_info};
 
 // ============================================================================
 // Shared Memory Structures
@@ -132,8 +132,6 @@ async fn task8(_args: *mut c_void) {
 
 #[embassy_preempt_macros::entry]
 fn main() -> ! {
-    // Clear BSS section
-    bss::clear_bss();
 
     // Display early trap vector info for debugging
     system_info::print_trap_vector_info();

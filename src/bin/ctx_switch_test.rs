@@ -17,7 +17,7 @@ cargo build --release --bin ctx_switch_test --features "jh7110"
 use core::ffi::c_void;
 use core::sync::atomic::{AtomicU64, Ordering};
 
-use embassy_preempt_app::{bss, gpio, system_info};
+use embassy_preempt_app::{gpio, system_info};
 use embassy_preempt_executor::{os_time::timer::Timer, AsyncOSTaskCreate, OSInit, OSStart};
 use embassy_preempt_log::task_log;
 
@@ -114,8 +114,6 @@ async fn task_b(_args: *mut c_void) {
 
 #[embassy_preempt_macros::entry]
 fn main() -> ! {
-    bss::clear_bss();
-
     task_log!(info, "=== 上下文切换精确性能测试 ===");
     task_log!(info, "测试方法: 使用 mcycle 计数器测量上下文切换周期数");
     task_log!(info, "GPIO45: 任务A运行时为高，任务B运行时为低");

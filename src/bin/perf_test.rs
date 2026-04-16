@@ -15,7 +15,7 @@ use crate::gpio::gpio;
 use embassy_preempt_executor::{os_time::timer::Timer, AsyncOSTaskCreate, OSInit, OSStart};
 use embassy_preempt_log::task_log;
 
-use embassy_preempt_app::{bss, gpio, system_info};
+use embassy_preempt_app::{gpio, system_info};
 
 async fn high_task(_args: *mut c_void) {
     for i in 0..1000 {
@@ -33,8 +33,6 @@ async fn low_task(_args: *mut c_void) {
 
 #[embassy_preempt_macros::entry]
 fn main() -> ! {
-    bss::clear_bss();
-
     task_log!(info, "=== 上下文切换测试 ===");
     task_log!(info, "GPIO45 - 切换时间");
     task_log!(info, "GPIO37/39/40 - 内核标记");

@@ -14,7 +14,7 @@ use core::ffi::c_void;
 use embassy_preempt_executor::{os_time::timer::Timer, AsyncOSTaskCreate, OSInit, OSStart};
 use embassy_preempt_log::task_log;
 
-use embassy_preempt_app::{bss, system_info};
+use embassy_preempt_app::system_info;
 
 use aclint::SifiveClint;
 /// CLINT base address for JH7110
@@ -59,8 +59,6 @@ async fn task_2(_args: *mut c_void) {
 
 #[embassy_preempt_macros::entry]
 fn main() -> ! {
-    bss::clear_bss();
-
     task_log!(info, "=== 定时器测试 ===");
 
     // 初始化GPIO

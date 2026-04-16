@@ -23,7 +23,7 @@ use core::ffi::c_void;
 use embassy_preempt_executor::{OSInit, OSStart, SyncOSTaskCreate};
 use embassy_preempt_log::task_log;
 
-use embassy_preempt_app::{bss, gpio::TestGpio, system_info};
+use embassy_preempt_app::{gpio::TestGpio, system_info};
 
 // ============================================================================
 // 全局变量
@@ -296,9 +296,6 @@ fn gpio_monitor_task(_args: *mut c_void) {
 
 #[embassy_preempt_macros::entry]
 fn main() -> ! {
-    // 清除BSS段
-    bss::clear_bss();
-
     // 显示系统信息
     system_info::print_trap_vector_info();
 

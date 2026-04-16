@@ -5,7 +5,6 @@
 
 #![no_std]
 
-pub mod bss;
 pub mod cpu_freq;
 pub mod csr;
 pub mod gpio;

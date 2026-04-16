@@ -6,12 +6,11 @@
 use core::ffi::c_void;
 
 use embassy_preempt_executor::{OSInit, OSStart};
-use embassy_preempt_app::{bss, cpu_freq};
+use embassy_preempt_app::cpu_freq;
 use embassy_preempt_log::task_log;
 
 #[embassy_preempt_macros::entry]
 fn main() -> ! {
-    bss::clear_bss();
 
     // 获取当前HART信息
     let hart_id = cpu_freq::get_hart_id();
