@@ -52,8 +52,7 @@ spin = "0.10.0"
 portable-atomic = { version = "1.13.1", features = ["fallback"] }
 
 # Inter-hart communication
-ov-channal = { path = "../../ov_channal" }
-# ov-channal = { git = "https://github.com/Oveln/ov_channal", rev = "41744b81f90e4a6c68ede8ff85570113f8539035" }
+ov-channal = { git = "https://github.com/Oveln/ov_channal", rev = "41744b81f90e4a6c68ede8ff85570113f8539035" }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 postcard = { version = "1.1", default-features = false }
 
